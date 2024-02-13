@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>毎日の記録</h2>
+<form method="post">
+    {% csrf_token %}
+    <div>
+    <label for="sleep_hours_hour">睡眠時間:</label>
+    <input type="number" id="sleep_hours_hour" name="sleep_hours_hour" min="0" max="23"> 時間
+    <input type="number" id="sleep_hours_minute" name="sleep_hours_minute" min="0" max="59"> 分
+    <input type="hidden" id="sleep_hours" name="sleep_hours">
+    </div>
+
+    
+    <div>
+    <label for="{{ form.physical_condition.id_for_label }}">体調:</label>
+    {{ form.physical_condition }}
+    <span class="scale-description">悪い←１ーーー５→良い</span>
+    </div>
+
+
+    <div>
+    <label for="{{ form.stress_level.id_for_label }}">ストレス度合い:</label>
+    {{ form.stress_level }}
+    <span class="scale-description">悪い←１ーーー５→良い</span>
+    </div>
+
+    <div>
+    <label for="{{ form.hydration_amount.id_for_label }}">水分摂取量:</label>
+    {{ form.hydration_amount }} ml
+    <span class="hydration-note">★１日の水分摂取量は2000mlを目安にしましょう</span>
+    </div>
+
+    <!-- 朝食内容 -->
+    <div class="form-item">
+    <label for="{{ form.breakfast_content.id_for_label }}">朝食:</label>
+    {{ form.breakfast_content }}
+    </div>
+
+    <!-- 昼食内容 -->
+    <div class="form-item">
+    <label for="{{ form.lunch_content.id_for_label }}">昼食:</label>
+    {{ form.lunch_content }}
+    </div>
+
+    <!-- 夕食内容 -->
+    <div class="form-item">
+    <label for="{{ form.dinner_content.id_for_label }}">夕食:</label>
+    {{ form.dinner_content }}
+    </div>
+
+    <!-- その他の食事内容 -->
+    <div class="form-item">
+    <label for="{{ form.other_meal_content.id_for_label }}">その他:</label>
+    {{ form.other_meal_content }}
+    </div>
+
+    <div class="form-item">
+    <label for="{{ form.training_content.id_for_label }}">トレーニング内容:</label>
+    {{ form.training_content }}
+    </div>
+
+    <button type="submit">保存</button>
+</form>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    var hour = document.getElementById('sleep_hours_hour').value;
+    var minute = document.getElementById('sleep_hours_minute').value;
+    document.getElementById('sleep_hours').value = hour + '時間' + minute + '分';
+});
+</script>
+{% endblock %}

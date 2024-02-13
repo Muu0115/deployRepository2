@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>GuestBookPage</h1>
+    <!-- 利用案内のコメント -->
+    <div class="page-description">
+        <h2>このページのご利用方法</h2>
+        <p>  このページでは、ユーザーへの質問やコミュニケーションを取るための場としてお使いください。<strong>フィットネス仲間と通じ合い共に頑張りましょう！</strong></p>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.description }} <!-- Djangoのフォームフィールド、プレースホルダーはforms.pyで設定 -->
+        <button type="submit">コメントを投稿</button>
+    </form>
+
+    <!-- 新しいエントリーの表示 -->
+    {% for entry in entries %}
+        <div class="entry">
+            <p class="comment-timestamp">投稿日時: {{ entry.timestamp|date:"Y年m月d日 H:i" }}</p>
+            <p class="comment-text">{{ entry.user.username }}: {{ entry.description }}</p>
+            <div class="reply-container" id="reply-container-{{ entry.id }}">
+                <!-- 返信の件数を表示するボタン -->
+                <button class="comment-button" onclick="toggleReplies('{{ entry.id }}')">
+                    返信コメント ({{ entry.replies.all.count }})
+                </button>
+                <!-- コメントボタンをクリックすると返信が表示される -->
+                <div id="replies-{{ entry.id }}" class="reply">
+                    {% for reply in entry.replies.all %}
+                    <p class="comment-timestamp">返信日時: {{ reply.timestamp|date:"Y年m月d日 H:i" }}</p>
+                    <p class="comment-text">{{ reply.user.username }}: {{ reply.description }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div id="reply-form-{{ entry.id }}" style="display:none;">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="entry_id" value="{{ entry.id }}">
+                    <textarea name="reply_text"></textarea>
+                    <button type="submit">返信を送信</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- JavaScriptファイルの参照を追加 -->
+    {% load static %}
+    <script src="{% static 'activity-processor.js' %}"></script>
+{% endblock %}
+

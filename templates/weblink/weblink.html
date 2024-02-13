@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1>Web Link</h1>
+    <div class="page-description">
+    <p class="lead">　　　様々なジャンルのおすすめ動画をご用意しました</p>
+    <p class="lead">　　　ご自身の目的に合わせ動画をご覧ください</p>
+    {% for link in links %}
+        <div>
+            <h2>{{ link.title }}</h2>
+            <p>{{ link.description }}</p>
+            <a href="{{ link.url }}" target="_blank">Visit</a>
+        </div>
+    {% endfor %}
+{% endblock %}

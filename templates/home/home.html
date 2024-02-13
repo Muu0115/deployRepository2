@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Health Life{% endblock %}
+
+{% block content %}
+
+  <!-- Welcome back セクション -->
+  <div class="jumbotron" style="background-color: transparent;">
+    <h1 class="display-4">Welcome back!!</h1>
+    <p class="lead">身体の記録を習慣化し　理想的な身体、健康維持を目指しましょう</p>
+  </div>
+
+  <div class="container">
+  <!-- 目標の表示 -->
+     {% if target %}
+       <div class="section">
+        <div class="section-title">
+          <h2>あなたの目標: {{ target }}</h2>
+        <div>
+       </div>
+     {% endif %}
+  
+    <!-- 今日の体重入力フォーム -->
+  <div class="section">
+    <p class="lead">最初にマイページからご自身の身長を設定し現在のBMI値を確認しましょう</p>
+    <form method="post" class="form-inline">
+
+     {% csrf_token %}
+     <div class="form-group mb-2">
+       {{ form.weight.label_tag }} <!-- 体重のラベル -->
+       {{ form.weight }} <!-- 体重の入力フィールド -->
+     </div>
+     <button type="submit" class="btn btn-custom mb-2">体重を記録しBMIをチェック☑️</button>
+    </form>
+    
+    {% if height_for_js %}
+      <p id="height" data-height="{{ height_for_js }}" hidden></p>
+    {% endif %}
+
+
+    <!-- BMIの結果を表示する場所 -->
+    {% if bmi %}
+      <div class="bmi-result">
+        <h3>今日のBMI: {{ bmi }}</h3>
+      </div>
+    {% endif %}
+
+    <span id="user-height" style="display:none;">{{ user.userprofile.height }}</span>
+
+    {% load static %}
+    <script src="{% static 'js/bmi_calculator.js' %}"></script>
+  </div>
+  <!-- カレンダーセクション -->
+  <div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <p>日付をクリックして、活動と食事を記録してください</p>
+    <div class="calendar-container">
+      <!-- カレンダーがここに表示されます -->
+      <!-- JavaScriptコード -->
+      <script>
+        // ここにカレンダーを生成するためのJavaScriptコードを挿入
+   document.addEventListener('DOMContentLoaded', function() {
+    var calendarContainer = document.querySelector('.calendar-container');
+    var today = new Date();
+    var currentYear = today.getFullYear();
+    var currentMonth = today.getMonth();
+    var currentDate = today.getDate();
+
+    function createCalendar(year, month) {
+    var days = ['日', '月', '火', '水', '木', '金', '土'];
+    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var date = new Date(year, month, 1);
+    var table = `<div class='month-display'><button onclick='changeMonth(-1)'>◀</button><span>${monthNames[month]} ${year}</span><button onclick='changeMonth(1)'>▶</button></div><table><tr>${days.map(day => `<th>${day}</th>`).join('')}</tr>`;
+
+    // 月の初めの曜日まで空白を埋める
+    for (var i = 0; i < date.getDay(); i++) {
+        table += "<td></td>";
+    }
+    
+    var filled = false;
+
+    while (date.getMonth() === month) {
+        if (date.getDay() === 0) {
+            if (filled) {
+                table += '</tr>';
+            }
+            table += '<tr>';
+            filled = true;
+        }
+
+        var day = date.getDate();
+        var className = (day === currentDate && month === today.getMonth() && year === today.getFullYear()) ? 'today' : '';
+        var dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        table += `<td class='${className}'><a href="/health_record/${dateString}">${day}</a></td>`;
+
+        if (date.getDay() === 6) {
+            table += '</tr>';
+        }
+
+        date.setDate(day + 1);
+    }
+
+    // 最後の行を閉じる
+    if (filled) {
+        table += '</tr>';
+    }
+
+    table += '</table>';
+    calendarContainer.innerHTML = table;
+}
+
+
+    function changeMonth(delta) {
+        currentMonth += delta;
+        if (currentMonth < 0) {
+            currentYear--;
+            currentMonth = 11;
+        } else if (currentMonth > 11) {
+            currentYear++;
+            currentMonth = 0;
+        }
+        createCalendar(currentYear, currentMonth);
+    }
+
+    createCalendar(currentYear, currentMonth);
+});
+
+      </script>
+    </div>
+  </div>
+
+  <!-- CommunicationSite リンク -->
+  <div class="communication-link">
+    <p><a href="{% url 'guestbook' %}">CommunicationSite</a></p>
+  </div>
+{% endblock %}
