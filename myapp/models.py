@@ -1,14 +1,14 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
 from django.contrib.auth import get_user_model
 from datetime import datetime
 from django.utils import timezone
 from datetime import date
-#from .models import WebLink  
-#from .models import GuestBookEntry  
-#from django.core.validators import URLValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+from datetime import timedelta
+
 
 User = get_user_model()
 
@@ -66,15 +66,15 @@ class UserProfile(models.Model):
 class HealthRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
-    sleep_hours = models.DecimalField(max_digits=4, decimal_places=1)
+    sleep_hours = models.CharField(max_length=5, blank=True, null=True)
     CONDITION_CHOICES = [(i, str(i)) for i in range(1, 6)]
-    physical_condition = models.IntegerField(choices=CONDITION_CHOICES)
-    stress_level = models.IntegerField(choices=CONDITION_CHOICES)
-    hydration_amount = models.IntegerField()
-    breakfast_content = models.TextField(blank=True, null=True)  # 朝食内容
-    lunch_content = models.TextField(blank=True, null=True)      # 昼食内容
-    dinner_content = models.TextField(blank=True, null=True)     # 夕食内容
-    other_meal_content = models.TextField(blank=True, null=True) # その他の食事内容
+    physical_condition = models.IntegerField(choices=CONDITION_CHOICES, null=True, blank=True)
+    stress_level = models.IntegerField(choices=CONDITION_CHOICES, null=True, blank=True)
+    hydration_amount = models.IntegerField(null=True, blank=True)
+    breakfast_content = models.TextField(blank=True, null=True)  
+    lunch_content = models.TextField(blank=True, null=True)      
+    dinner_content = models.TextField(blank=True, null=True)     
+    other_meal_content = models.TextField(blank=True, null=True) 
     training_content = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -85,15 +85,20 @@ class WebLink(models.Model):
     title = models.CharField(max_length=255)
     url = models.URLField()
     description = models.TextField()
-    created_at = models.DateTimeField(default=datetime.now)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
     purpose = models.CharField(max_length=255, blank=True)  # 動画の目的や用途
     tags = models.CharField(max_length=255, blank=True)     # 動画に関連するタグ
 
     def __str__(self):
         return f"{self.title} - {self.purpose}"
+    
+    class Meta:
+        permissions = [
+            ('can_view_weblink', 'Can view web link'),
+            # 他のカスタムパーミッションがあれば追加
+        ]
 
 
 class GuestBookEntry(models.Model):
@@ -118,3 +123,40 @@ class DailyWeight(models.Model):
 
     class Meta:
         unique_together = ('user', 'date')
+
+class UserRewards(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    last_login_date = models.DateField(auto_now_add=True)
+    continuous_weeks = models.IntegerField(default=0)
+    continuous_months = models.IntegerField(default=0)
+
+    def update_login_streak(self):
+        today = timezone.now().date()
+        last_login = self.last_login_date
+
+        if last_login:
+            # 前回のログインが今日から1日前であるかをチェック
+            if last_login == today - timedelta(days=1):
+                # 週数と月数のカウントアップ
+                # 以下は単純な例です
+                self.continuous_days += 1
+                self.continuous_weeks = self.continuous_days // 7
+                self.continuous_months = self.continuous_days // 30
+            else:
+                # 連続ログインが途切れた場合、カウンタをリセット
+                self.continuous_days = 0
+                self.continuous_weeks = 0
+                self.continuous_months = 0
+
+        self.last_login_date = today
+        self.save()
+
+
+@receiver(post_save, sender=User)
+def create_user_rewards(sender, instance, created, **kwargs):
+    if created:
+        UserRewards.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_rewards(sender, instance, **kwargs):
+    instance.userrewards.save()

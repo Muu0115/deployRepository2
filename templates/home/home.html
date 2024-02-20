@@ -50,7 +50,7 @@
     {% load static %}
     <script src="{% static 'js/bmi_calculator.js' %}"></script>
   </div>
-  <!-- カレンダーセクション -->
+ <!-- カレンダーセクション --> 
   <div class="row justify-content-center">
   <div class="col-md-8 col-lg-6">
     <p>日付をクリックして、活動と食事を記録してください</p>
@@ -90,8 +90,9 @@
 
         var day = date.getDate();
         var className = (day === currentDate && month === today.getMonth() && year === today.getFullYear()) ? 'today' : '';
-        var dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        var dateString = `${year}/${String(month + 1).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
         table += `<td class='${className}'><a href="/health_record/${dateString}">${day}</a></td>`;
+
 
         if (date.getDay() === 6) {
             table += '</tr>';
@@ -129,8 +130,4 @@
     </div>
   </div>
 
-  <!-- CommunicationSite リンク -->
-  <div class="communication-link">
-    <p><a href="{% url 'guestbook' %}">CommunicationSite</a></p>
-  </div>
 {% endblock %}

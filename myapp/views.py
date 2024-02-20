@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -6,17 +7,15 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
-from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import UserProfile, HealthRecord, Entry, Reply, DailyWeight, WebLink
 from .forms import UserProfileForm, HealthRecordForm, WebLinkForm, EntryForm, DailyWeightForm
 from datetime import datetime, date
 from decimal import Decimal
 from django.http import HttpResponse
-from django.contrib.admin.views.decorators import staff_member_required
-
-
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from .forms import CustomUserCreationForm
 
 # signup ビューは signup.html テンプレートを表示します
 def signup(request):
@@ -31,7 +30,11 @@ def signup(request):
             return redirect('home')  # ホームページへリダイレクト
     else:
         form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup/signup.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 # SignUpViewクラスはユーザー登録用のビューを定義します
 class SignUpView(CreateView):
@@ -44,63 +47,59 @@ class SignUpView(CreateView):
         response = super(SignUpView, self).form_valid(form)  # 親クラスのform_validメソッドを呼び出し
         UserProfile.objects.create(user=self.object)  # type: ignore # ユーザープロファイルを作成
         return response
+    
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'signup/signup.html', {'form': form})
+
 
 @login_required
-def manage_health_record(request, year, month, day):
-    # URLから日付を取得
-    record_date = datetime(year=year, month=month, day=day)
-
-    try:
-        # 既存の記録を取得、なければ新規作成
-        health_record = HealthRecord.objects.get(user=request.user, date=record_date)
-    except HealthRecord.DoesNotExist:
-        health_record = None
+def manage_health_record(request, year=None, month=None, day=None):
+ 
+    if year and month and day:
+        try:
+            record_date = datetime(year=int(year), month=int(month), day=int(day)).date()
+        except ValueError:
+            # 不正な日付が与えられた場合、404エラーを発生させる
+            raise Http404("Invalid date provided.")
+        
+        health_record, created = HealthRecord.objects.get_or_create(
+            user=request.user, 
+            date=record_date,
+        )      
+        
+    else:
+        record_date = None
+        return redirect('home')
 
     if request.method == 'POST':
         form = HealthRecordForm(request.POST, instance=health_record)
         if form.is_valid():
             new_record = form.save(commit=False)
             new_record.user = request.user
-            new_record.date = record_date
+            new_record.sleep_hours = form.cleaned_data['sleep_hours']
+            new_record.date = record_date if record_date else timezone.now().date()
             new_record.save()
             return redirect('home')
     else:
         form = HealthRecordForm(instance=health_record)
 
-    return render(request, 'health_record/health_record.html', {
-        'form': form,
-        'record_date': record_date.strftime('%Y-%m-%d')
-    })
-
-def health_record(request, year, month, day):
-    record_date = datetime(year=year, month=month, day=day)
-    try:
-        health_record = HealthRecord.objects.get(user=request.user, date=record_date)
-    except HealthRecord.DoesNotExist:
-        health_record = None
-
-    if request.method == 'POST':
-        form = HealthRecordForm(request.POST, instance=health_record)
-        if form.is_valid():
-            new_record = form.save(commit=False)
-            new_record.user = request.user
-            new_record.date = record_date
-            new_record.save()
-            return redirect('home')
-    else:
-        form = HealthRecordForm(instance=health_record)
+    # record_dateがNoneでない場合のみ日付を文字列に変換
+    record_date_str = record_date.strftime('%Y-%m-%d') if record_date else None
 
     return render(request, 'health_record/health_record.html', {
         'form': form,
-        'record_date': record_date.strftime('%Y-%m-%d')
+        'record_date': record_date_str
     })
 
-@staff_member_required
+@login_required
 def add_weblink(request):
-    # 管理者かどうかをチェックする
-    if not request.user.is_staff:
-        return HttpResponse('Unauthorized', status=401)
-
     if request.method == 'POST':
         form = WebLinkForm(request.POST)
         if form.is_valid():
@@ -115,8 +114,8 @@ def weblink_detail(request, pk):
     return render(request, 'weblink/detail.html', {'weblink': weblink})
 
 def weblink_list(request):
-    links = WebLink.objects.all()  
-    return render(request, 'weblink/weblink.html', {'links': links}) 
+    links = WebLink.objects.all()
+    return render(request, 'weblink/weblink.html', {'links': links})
 
 
 def guestbook(request):
@@ -206,3 +205,18 @@ def mypage(request):
         form = UserProfileForm(instance=profile)
 
     return render(request, 'mypage/mypage.html', {'form': form})
+
+def custom_login_view(request):
+    # ユーザー認証のロジックを実装
+    # ...
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+
+
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        login(request, user)
+        # UserRewardsの連続ログイン週数と月数を更新
+        user.userrewards.update_login_streak()
+
+

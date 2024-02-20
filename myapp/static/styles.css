@@ -1,3 +1,70 @@
+/* 全体のフォーム要素のスタイルを設定 */
+form {
+    background-color: #f9f9f9; /* フォームの背景色 */
+    padding: 20px; /* 内側の余白 */
+    border-radius: 8px; /* 角の丸み */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を付ける */
+    max-width: 800px; /* 最大幅を設定 */
+    margin: auto; /* 左右中央揃え */
+}
+
+/* ラベルのスタイル */
+label {
+    display: block; /* ブロック要素として表示 */
+    margin-bottom: 5px; /* 下部の余白 */
+    font-weight: bold; /* 太字にする */
+}
+
+/* 入力要素のスタイル */
+input[type="number"],
+.form-item input,
+.form-item textarea {
+    width: 100%; /* 幅を100%に設定 */
+    padding: 8px; /* 内側の余白 */
+    margin-bottom: 15px; /* 下部の余白 */
+    border: 1px solid #ddd; /* 枠線を設定 */
+    border-radius: 4px; /* 角の丸み */
+}
+
+/* セレクトボックスのスタイル */
+select {
+    width: 100%; /* 幅を100%に設定 */
+    padding: 8px; /* 内側の余白 */
+    border: 1px solid #ddd; /* 枠線を設定 */
+    border-radius: 4px; /* 角の丸み */
+    margin-bottom: 15px; /* 下部の余白 */
+}
+
+/* ボタンのスタイル */
+button[type="submit"] {
+    background-color: #f2f2f2; /* 背景色 */
+    color: black; /* 文字色 */
+    padding: 10px 20px; /* 内側の余白 */
+    border: none; /* 枠線なし */
+    border-radius: 4px; /* 角の丸み */
+    cursor: pointer; /* カーソルを指に */
+    font-size: 1em; /* 文字サイズ */
+}
+
+button[type="submit"]:hover {
+    background-color: #f2f2f2; /* ホバー時の背景色を少し暗く */
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    input[type="number"],
+    .form-item input,
+    .form-item textarea,
+    select {
+        width: 100%; /* 小さい画面では幅を100%に */
+    }
+}
+
+
+
+
+
+
 /* health_record.html */
 .exercise-goal-input {
     width: 25%;  /* サイズを4分の1に設定 */
@@ -169,7 +236,7 @@ textarea {
     margin: auto;
     font-size: 1.2em; /* 文字サイズを大きく */
     display: block; /* ブロック要素として扱う */
-    width: 100%; /* カレンダーの幅を80%に設定 */
+    width: 100%; 
 }
 
 .calendar-container table {
@@ -241,8 +308,13 @@ textarea {
     font-size: 0.9em; /* 文字サイズを小さくする */
 }
 
-
-
+/* CommunicationSite リンクのスタイル */
+.communication-link {
+    width: 100%;
+    margin-top: 20px; /* 上部に余白を追加 */
+    text-align: center; /* 中央寄せ */
+    padding-bottom: 20px; /* 下部の余白 */
+}
 
 
 /* guestbook.html*/
@@ -253,10 +325,7 @@ textarea {
     margin-bottom: 60px; /* 下部の余白を増やす */
 }
 
-/* CommunicationSite リンクのスタイル */
-.communication-link {
-    margin-top: 20px; /* 上部に余白を追加 */
-}
+
 
 /* Guestbookページのコメント欄区切り線 */
 .entry + .entry {

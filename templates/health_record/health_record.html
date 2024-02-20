@@ -2,22 +2,23 @@
 
 {% block content %}
 <h2>毎日の記録</h2>
-<form method="post">
+<div class="page-description">
+   <p class="lead">　　　日頃の細かな行動や心情は健康に大きく関与します　記録をつけておくことで体調変化をより管理していきましょう</p>
+</div>
+{% if record_date %}
+<form method="post" action="{% url 'manage_health_record' year=record_date.year month=record_date.month day=record_date.day %}">
+
     {% csrf_token %}
     <div>
-    <label for="sleep_hours_hour">睡眠時間:</label>
-    <input type="number" id="sleep_hours_hour" name="sleep_hours_hour" min="0" max="23"> 時間
-    <input type="number" id="sleep_hours_minute" name="sleep_hours_minute" min="0" max="59"> 分
-    <input type="hidden" id="sleep_hours" name="sleep_hours">
+        <label for="{{ form.sleep_hours.id_for_label }}">睡眠時間:</label>
+        {{ form.sleep_hours }}
     </div>
-
-    
+       
     <div>
     <label for="{{ form.physical_condition.id_for_label }}">体調:</label>
     {{ form.physical_condition }}
     <span class="scale-description">悪い←１ーーー５→良い</span>
     </div>
-
 
     <div>
     <label for="{{ form.stress_level.id_for_label }}">ストレス度合い:</label>
@@ -30,6 +31,8 @@
     {{ form.hydration_amount }} ml
     <span class="hydration-note">★１日の水分摂取量は2000mlを目安にしましょう</span>
     </div>
+
+<p class="lead">　🍽食事内容🍽</p>
 
     <!-- 朝食内容 -->
     <div class="form-item">
@@ -63,11 +66,5 @@
     <button type="submit">保存</button>
 </form>
 
-<script>
-document.querySelector('form').addEventListener('submit', function(e) {
-    var hour = document.getElementById('sleep_hours_hour').value;
-    var minute = document.getElementById('sleep_hours_minute').value;
-    document.getElementById('sleep_hours').value = hour + '時間' + minute + '分';
-});
-</script>
+{% endif %}
 {% endblock %}

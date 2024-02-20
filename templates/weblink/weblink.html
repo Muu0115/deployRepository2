@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <h1>Web Link</h1>
+    <h1>Web links</h1>
     <div class="page-description">
     <p class="lead">　　　様々なジャンルのおすすめ動画をご用意しました</p>
     <p class="lead">　　　ご自身の目的に合わせ動画をご覧ください</p>
@@ -10,7 +10,14 @@
         <div>
             <h2>{{ link.title }}</h2>
             <p>{{ link.description }}</p>
-            <a href="{{ link.url }}" target="_blank">Visit</a>
+            <a href="{{ link.url }}" target="_blank">チャンネルを見る</a>
         </div>
+
+        <div>
+        <h2>MarinaTakewaki さん</h2>
+        <p>ダイエット、シェイプアップを自宅で楽しく行おう！</p>
+        <a href="https://www.youtube.com/@MarinaTakewaki" target="_blank">チャンネルを見る</a>
+        </div>
+
     {% endfor %}
 {% endblock %}

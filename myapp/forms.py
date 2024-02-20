@@ -1,6 +1,8 @@
 from django import forms
 from .models import UserProfile, HealthRecord, WebLink, Entry, DailyWeight
-
+from django.contrib.auth.forms import UserCreationForm
+from .models import UserCredentials, UserProfile
+from django.contrib.auth import get_user_model
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -56,3 +58,22 @@ class DailyWeightForm(forms.ModelForm):
         labels = {
             'weight': '体重',
         }
+
+class CustomUserCreationForm(UserCreationForm):
+    # 新しいフィールドを追加
+    height = forms.FloatField(required=False, help_text='メートル単位で入力してください。例: 1.70')
+    weight = forms.FloatField(required=False, help_text='キログラム単位で入力してください。')
+
+    class Meta:
+        model = UserCredentials  # あなたのカスタムユーザーモデルを指定
+        fields = ('username', 'height', 'weight')  # 必要なフィールドを追加
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user_profile = UserProfile(user=user)
+        user_profile.height = self.cleaned_data['height']
+        user_profile.weight = self.cleaned_data['weight']
+        if commit:
+            user.save()
+            user_profile.save()
+        return user
