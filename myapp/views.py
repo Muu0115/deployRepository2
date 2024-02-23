@@ -17,6 +17,7 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 from .forms import CustomUserCreationForm
 
+
 # signup ビューは signup.html テンプレートを表示します
 def signup(request):
     if request.method == 'POST':
@@ -58,45 +59,48 @@ def register(request):
         form = CustomUserCreationForm()
     return render(request, 'signup/signup.html', {'form': form})
 
-
+     
 @login_required
 def manage_health_record(request, year=None, month=None, day=None):
- 
+    record_date = None
+    health_record = None
+
+# 日付パラメータがすべて提供されている場合にのみ記録を取得または作成
     if year and month and day:
         try:
             record_date = datetime(year=int(year), month=int(month), day=int(day)).date()
         except ValueError:
             # 不正な日付が与えられた場合、404エラーを発生させる
             raise Http404("Invalid date provided.")
-        
         health_record, created = HealthRecord.objects.get_or_create(
             user=request.user, 
             date=record_date,
-        )      
-        
-    else:
-        record_date = None
-        return redirect('home')
+        )
+ 
 
+    else:
+        form = HealthRecordForm(instance=health_record)
+    
+    # POSTリクエストの処理
     if request.method == 'POST':
         form = HealthRecordForm(request.POST, instance=health_record)
         if form.is_valid():
             new_record = form.save(commit=False)
             new_record.user = request.user
             new_record.sleep_hours = form.cleaned_data['sleep_hours']
+            # 日付が指定されていない場合は現在の日付を使用
             new_record.date = record_date if record_date else timezone.now().date()
             new_record.save()
             return redirect('home')
     else:
         form = HealthRecordForm(instance=health_record)
 
-    # record_dateがNoneでない場合のみ日付を文字列に変換
-    record_date_str = record_date.strftime('%Y-%m-%d') if record_date else None
-
-    return render(request, 'health_record/health_record.html', {
+   # テンプレートに渡すコンテキストを準備
+    context = {
         'form': form,
-        'record_date': record_date_str
-    })
+        'record_date': record_date  # 'record_date_str' の代わりに 'record_date' を渡す
+    }
+    return render(request, 'health_record/health_record.html', context) 
 
 @login_required
 def add_weblink(request):
@@ -118,6 +122,7 @@ def weblink_list(request):
     return render(request, 'weblink/weblink.html', {'links': links})
 
 
+@login_required
 def guestbook(request):
     if request.method == 'POST':
         # 返信の処理
@@ -145,7 +150,7 @@ def guestbook(request):
 
 def home(request):
     if not request.user.is_authenticated:
-        return redirect('login')  # ログインしていないユーザーをログインページにリダイレクト
+         return render(request, 'welcome/welcome.html')  # ログインしていないユーザーをログインページにリダイレクト
 
     form = DailyWeightForm()
     bmi = None

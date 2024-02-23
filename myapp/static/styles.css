@@ -482,3 +482,62 @@ textarea {
     background-color: #e6e6e6; /* ホバー時の背景色 */
 }
 
+.video-card {
+    background-color: #ffffff; /* カードの背景色 */
+    border: 1px solid #ddd; /* カードのボーダー */
+    border-radius: 8px; /* カードの角の丸み */
+    padding: 20px; /* カード内の余白 */
+    margin-bottom: 20px; /* カード間の余白 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* カードの影 */
+    transition: box-shadow 0.3s ease-in-out; /* ホバー時の影のトランジション */
+  }
+  
+  .video-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* ホバー時の影を強調 */
+  }
+  
+  .video-title {
+    margin-top: 0; /* タイトル上の余白をなくす */
+    color: #333; /* タイトルの文字色 */
+    font-size: 1.2em; /* タイトルのフォントサイズ */
+    margin-bottom: 10px; /* タイトル下の余白 */
+  }
+  
+  .video-description {
+    font-size: 1em; /* 説明文のフォントサイズ */
+    color: #666; /* 説明文の文字色 */
+    margin-bottom: 15px; /* 説明文下の余白 */
+  }
+  
+  .video-link {
+    display: inline-block; /* リンクをインラインブロックに */
+    background-color: #f2f2f2; /* リンクの背景色 */
+    color: #333; /* リンクの文字色 */
+    padding: 10px 15px; /* リンク内の余白 */
+    border-radius: 4px; /* リンクの角の丸み */
+    text-decoration: none; /* テキストの下線を消す */
+    transition: background-color 0.3s ease-in-out; /* 背景色のトランジション */
+  }
+  
+  .video-link:hover {
+    background-color: #e6e6e6; /* ホバー時の背景色 */
+  }
+  
+  /* 新規登録とログインリンクのスタイル */
+.link-button {
+    background-color: #f2f2f2; /* 背景色 */
+    color: black; /* 文字色 */
+    padding: 10px 20px; /* 内側の余白 */
+    border: none; /* 枠線なし */
+    border-radius: 4px; /* 角の丸み */
+    cursor: pointer; /* カーソルを指に */
+    font-size: 1em; /* 文字サイズ */
+    text-decoration: none; /* テキストの下線を消す */
+    display: inline-block; /* インラインブロック要素として表示 */
+    margin: 5px; /* 周囲の余白 */
+    transition: background-color 0.3s; /* 背景色の変化にアニメーションを設定 */
+}
+
+.link-button:hover {
+    background-color: #e6e6e6; /* ホバー時の背景色 */
+}

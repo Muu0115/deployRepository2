@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Health Life</h1>
+  <div class="page-description">
+  <h4>　　　　身体の記録を習慣化し　理想的な身体、健康維持を目指しましょう</h4>
+  </div>
+  <div>
+    <a href="{% url 'signup' %}" class="link-button">新規登録</a>
+    <a href="{% url 'login' %}" class="link-button">ログイン</a>
+  </div>
+{% endblock %}

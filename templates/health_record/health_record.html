@@ -65,6 +65,11 @@
 
     <button type="submit">保存</button>
 </form>
-
+{% else %}
+    <div class="alert alert-warning" role="alert">
+        日付が選択されていません。カレンダーから日付を選択してください。
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-primary">ホーム画面へ</a>
 {% endif %}
+
 {% endblock %}
