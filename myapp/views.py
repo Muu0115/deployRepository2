@@ -39,13 +39,13 @@ def logout_view(request):
 
 # SignUpViewクラスはユーザー登録用のビューを定義します
 class SignUpView(CreateView):
-    form_class = UserCreationForm
+    form_class = CustomUserCreationForm  # CustomUserCreationFormを使用するように変更
     success_url = reverse_lazy('login')  # ログインページへリダイレクト
     template_name = 'signup.html'
 
     # form_validメソッドはフォームが有効な場合に呼び出されます
     def form_valid(self, form):
-        response = super(SignUpView, self).form_valid(form)  # 親クラスのform_validメソッドを呼び出し
+        response = super().form_valid(form)
         UserProfile.objects.create(user=self.object)  # type: ignore # ユーザープロファイルを作成
         return response
     
@@ -152,47 +152,52 @@ def home(request):
     if not request.user.is_authenticated:
          return render(request, 'welcome/welcome.html')  # ログインしていないユーザーをログインページにリダイレクト
 
-    form = DailyWeightForm()
+    today = date.today()  # 今日の日付を取得
     bmi = None
-    target = None  # ユーザーの目標を初期化
-
+    target = None
+    height_for_js = None
+    daily_weight = None  # daily_weightを初期化
+    
+    # POSTリクエストの場合は、送信されたデータでフォームを初期化
     if request.method == 'POST':
         form = DailyWeightForm(request.POST)
         if form.is_valid():
-            # ユーザーと今日の日付でフィルタリングします
+            # ユーザーと今日の日付でフィルタリングし、体重を保存または更新します
             daily_weight, created = DailyWeight.objects.get_or_create(
-                user_id=request.user.id,
-                date=timezone.now().date(),
+                user=request.user,
+                date=today,
                 defaults={'weight': form.cleaned_data['weight']}
             )
             if not created:
-                # 既存のレコードを更新します
                 daily_weight.weight = form.cleaned_data['weight']
                 daily_weight.save()
+    else:
+        # GETリクエストの場合、今日の体重を取得またはフォームを初期化
+        daily_weight = DailyWeight.objects.filter(user=request.user, date=today).first()
+        if daily_weight:
+            form = DailyWeightForm(initial={'weight': daily_weight.weight})
+        else:
+            form = DailyWeightForm()
 
     try:
         profile = request.user.userprofile
-        target = profile.target  # 'target'フィールドをUserProfileモデルに追加してください
+        target = profile.target
         if profile.height:
-            height_m = Decimal(profile.height) / 100  # cmからmへ変換
-            today_weight = DailyWeight.objects.filter(user=request.user, date=date.today()).first()
-            if today_weight:
-                bmi = today_weight.weight / (height_m ** 2)
+            height_m = Decimal(profile.height) / 100
+            # POSTリクエストの後でないとき、または体重が既に存在する場合
+            if daily_weight:
+                bmi = daily_weight.weight / (height_m ** 2)
                 bmi = round(bmi, 2)
+            height_for_js = profile.height  # 身長をJavaScriptで使えるようにする
     except UserProfile.DoesNotExist:
-        profile = None  # プロファイルが存在しない場合
-
-    # 新しく追加する部分：身長をJavaScriptで使えるようにする
-    height_for_js = None
-    if profile:
-        height_for_js = profile.height
+        profile = None
 
     context = {
         'form': form,
         'bmi': bmi,
         'profile': profile,
-        'height_for_js': height_for_js,  # JavaScriptで使えるように身長を渡す
-        'target': target,  # 新しく追加
+        'height_for_js': height_for_js,
+        'target': target,
     }
 
     return render(request, 'home/home.html', context)

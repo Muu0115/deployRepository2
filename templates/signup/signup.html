@@ -1,10 +1,21 @@
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 
 {% block content %}
   <h2>新規登録</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey;">{{ field.help_text }}</small><br>
+        {% endif %}
+        {% if field.errors %}
+          <div class="errorlist">{{ field.errors|first }}</div>
+        {% endif %}
+      </p>
+    {% endfor %}
     <button type="submit">新規登録</button>
   </form>
   <p>アカウントをお持ちの方は <a href="{% url 'login' %}">こちらからログイン</a> してください。</p>

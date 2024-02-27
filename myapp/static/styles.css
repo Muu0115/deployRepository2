@@ -60,7 +60,10 @@ button[type="submit"]:hover {
     }
 }
 
-
+.errorlist {
+    color: red;
+  }
+  
 
 
 

@@ -3,6 +3,7 @@ from .models import UserProfile, HealthRecord, WebLink, Entry, DailyWeight
 from django.contrib.auth.forms import UserCreationForm
 from .models import UserCredentials, UserProfile
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -60,9 +61,43 @@ class DailyWeightForm(forms.ModelForm):
         }
 
 class CustomUserCreationForm(UserCreationForm):
-    # 新しいフィールドを追加
-    height = forms.FloatField(required=False, help_text='メートル単位で入力してください。例: 1.70')
-    weight = forms.FloatField(required=False, help_text='キログラム単位で入力してください。')
+    username = forms.CharField(
+        label='ユーザー名',
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9]*$',
+                message='ユーザー名は半角英数字で入力してください。記号は含めないでください。',
+                code='invalid_username'
+            ),
+        ],
+        help_text='半角英数字であること、記号は含まないこと。'
+    )
+    
+    # パスワードのバリデーションルールを定義
+    password1 = forms.CharField(
+        label='パスワード',
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex='^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$',
+                message='パスワードは8文字以上で、大文字小文字数字を含む必要があります。',
+                code='invalid_password'
+            ),
+        ],
+        help_text='大文字小文字数字を含む８文字以上であること。'
+    )
+
+   
+    height = forms.FloatField(
+        label='身長',
+        required=False, 
+        help_text='半角数字でメートル単位で入力してください。例: 1.70'
+        )
+    weight = forms.FloatField(
+        label='体重',
+        required=False,
+        help_text='半角数字でキログラム単位で入力してください。'
+        )
 
     class Meta:
         model = UserCredentials  # あなたのカスタムユーザーモデルを指定

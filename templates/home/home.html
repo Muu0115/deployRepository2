@@ -21,35 +21,43 @@
      {% endif %}
   
     <!-- 今日の体重入力フォーム -->
-  <div class="section">
-    <p class="lead">最初にマイページからご自身の身長を設定し現在のBMI値を確認しましょう</p>
-    <form method="post" class="form-inline">
+    <div class="section">
+      <p class="lead">最初にマイページからご自身の身長を設定し現在のBMI値を確認しましょう</p>
+      <form method="post" class="form-inline">
+        {% csrf_token %}
+        <div class="form-group mb-2">
+          {{ form.weight.label_tag }} <!-- 体重のラベル -->
+          {{ form.weight }} <!-- 体重の入力フィールド -->
+        </div>
+        <button type="submit" class="btn btn-custom mb-2">体重を記録しBMIをチェック☑️</button>
+      </form>
+      
+      <!-- 今日の体重を表示する場所（もし体重があれば） -->
+      {% if form.weight.value %}
+        <p>今日の体重: {{ form.weight.value }}</p>
+      {% else %}
+        <p>体重を入力してください</p>
+      {% endif %}
 
-     {% csrf_token %}
-     <div class="form-group mb-2">
-       {{ form.weight.label_tag }} <!-- 体重のラベル -->
-       {{ form.weight }} <!-- 体重の入力フィールド -->
-     </div>
-     <button type="submit" class="btn btn-custom mb-2">体重を記録しBMIをチェック☑️</button>
-    </form>
-    
-    {% if height_for_js %}
-      <p id="height" data-height="{{ height_for_js }}" hidden></p>
-    {% endif %}
+      {% if height_for_js %}
+        <p id="height" data-height="{{ height_for_js }}" hidden></p>
+      {% endif %}
 
+      <!-- BMIの結果を表示する場所 -->
+      {% if bmi %}
+        <div class="bmi-result">
+          <h3>今日のBMI: {{ bmi }}</h3>
+        </div>
+      {% endif %}
 
-    <!-- BMIの結果を表示する場所 -->
-    {% if bmi %}
-      <div class="bmi-result">
-        <h3>今日のBMI: {{ bmi }}</h3>
-      </div>
-    {% endif %}
+      <span id="user-height" style="display:none;">{{ user.userprofile.height }}</span>
 
-    <span id="user-height" style="display:none;">{{ user.userprofile.height }}</span>
-
-    {% load static %}
-    <script src="{% static 'js/bmi_calculator.js' %}"></script>
+      {% load static %}
+      <script src="{% static 'js/bmi_calculator.js' %}"></script>
+    </div>
   </div>
+{% endblock %}
+
  <!-- カレンダーセクション --> 
   <div class="row justify-content-center">
   <div class="col-md-8 col-lg-6">
