@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import UserCredentials, UserProfile
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import User 
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -100,15 +101,14 @@ class CustomUserCreationForm(UserCreationForm):
         )
 
     class Meta:
-        model = UserCredentials  # あなたのカスタムユーザーモデルを指定
+        model = User
         fields = ('username', 'height', 'weight')  # 必要なフィールドを追加
-
+    
     def save(self, commit=True):
         user = super().save(commit=False)
-        user_profile = UserProfile(user=user)
-        user_profile.height = self.cleaned_data['height']
-        user_profile.weight = self.cleaned_data['weight']
         if commit:
             user.save()
-            user_profile.save()
+            # UserProfileが既に存在しない場合のみ作成
+            UserProfile.objects.get_or_create(user=user)
         return user
+    

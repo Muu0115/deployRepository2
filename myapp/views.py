@@ -46,7 +46,6 @@ class SignUpView(CreateView):
     # form_validメソッドはフォームが有効な場合に呼び出されます
     def form_valid(self, form):
         response = super().form_valid(form)
-        UserProfile.objects.create(user=self.object)  # type: ignore # ユーザープロファイルを作成
         return response
     
 def register(request):
