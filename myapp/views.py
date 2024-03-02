@@ -18,6 +18,7 @@ from django.shortcuts import redirect
 from .forms import CustomUserCreationForm
 
 
+
 # signup ビューは signup.html テンプレートを表示します
 def signup(request):
     if request.method == 'POST':
@@ -214,18 +215,4 @@ def mypage(request):
         form = UserProfileForm(instance=profile)
 
     return render(request, 'mypage/mypage.html', {'form': form})
-
-def custom_login_view(request):
-    # ユーザー認証のロジックを実装
-    # ...
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-
-
-    user = authenticate(username=username, password=password)
-    if user is not None:
-        login(request, user)
-        # UserRewardsの連続ログイン週数と月数を更新
-        user.userrewards.update_login_streak()
-
 

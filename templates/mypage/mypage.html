@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2>マイページ</h2>
+  <h1>My page</h1>
   
   
   <form method="post">
@@ -15,8 +15,8 @@
     <!-- 線の挿入 -->
     <hr size="4"> 
     <!-- 目標の入力フォーム -->
-    <p class="lead">目標を立てましょう。</p>
-    <p class="lead">どんな身体作りをしていきたいのかを定めることは 非常に効果があります</p>
+    <p class="lead">目標を立てましょう！</p>
+    <p class="lead">理想の身体を目指すために　目標を見える化する事が大切です</p>
     <div class="form-group">
       <label for="target">目標:</label>
       <input type="text" id="target" name="target" class="form-control" value="{{ user.userprofile.target }}" required>

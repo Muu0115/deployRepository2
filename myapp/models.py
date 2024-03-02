@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth import get_user_model
 from datetime import datetime
 from django.utils import timezone
@@ -8,7 +8,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
-
+from django.conf import settings
 
 User = get_user_model()
 
@@ -124,39 +124,3 @@ class DailyWeight(models.Model):
     class Meta:
         unique_together = ('user', 'date')
 
-class UserRewards(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    last_login_date = models.DateField(auto_now_add=True)
-    continuous_weeks = models.IntegerField(default=0)
-    continuous_months = models.IntegerField(default=0)
-
-    def update_login_streak(self):
-        today = timezone.now().date()
-        last_login = self.last_login_date
-
-        if last_login:
-            # 前回のログインが今日から1日前であるかをチェック
-            if last_login == today - timedelta(days=1):
-                # 週数と月数のカウントアップ
-                # 以下は単純な例です
-                self.continuous_days += 1
-                self.continuous_weeks = self.continuous_days // 7
-                self.continuous_months = self.continuous_days // 30
-            else:
-                # 連続ログインが途切れた場合、カウンタをリセット
-                self.continuous_days = 0
-                self.continuous_weeks = 0
-                self.continuous_months = 0
-
-        self.last_login_date = today
-        self.save()
-
-
-@receiver(post_save, sender=User)
-def create_user_rewards(sender, instance, created, **kwargs):
-    if created:
-        UserRewards.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_rewards(sender, instance, **kwargs):
-    instance.userrewards.save()
